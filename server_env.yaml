@@ -1,0 +1,12 @@
+parameters:
+  key_name: testkey
+  image: Ubuntu Server 18.04 LTS (Bionic Beaver) amd64
+  flavor: m1.small
+  public_net: ntnu-internal
+  private_net_name: net1
+  private_net_cidr: 192.168.123.0/24
+  private_net_gateway: 192.168.123.1
+  private_net_pool_start: 192.168.123.200
+  private_net_pool_end: 192.168.123.250
+  volume_size: 25
+
