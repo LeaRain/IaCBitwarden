@@ -1,6 +1,6 @@
 parameters:
   key_name: testkey
-  image: Ubuntu Server 18.04 LTS (Bionic Beaver) amd64
+  image: Ubuntu Server 22.04 LTS (Jammy Jellyfish) amd64
   flavor: m1.small
   public_net: ntnu-internal
   private_net_name: net1
