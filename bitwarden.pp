@@ -1,19 +1,24 @@
 node default {
         class { 'docker':
                 version => latest,
-                docker_users => ['bitwarden'],
+        }
+
+
+        docker_volume { 'vaultwarden':
+                ensure => present,
         }
 
         docker::image { 'vaultwarden/server':
-                image_tag => 'latest'
+                image_tag => 'latest',
+                ensure => present
         }
 
         docker::run { 'vaultwarden':
                 image => 'vaultwarden/server',
                 detach => true,
-                volumes => ['/opt/bitwarden'],
-                ports => ['80'],
-                expose => ['80'],
-                command => '/bin/sh -c "while true; do echo hello world; sleep 1; done"',
+                volumes => ['vaultwarden:/data'],
+                ports => ['80:80'],
+                restart_service => true
         }
 }
+
