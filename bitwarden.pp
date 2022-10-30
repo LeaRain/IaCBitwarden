@@ -9,17 +9,16 @@ docker_volume { 'vaultwarden':
 
 docker::image { 'vaultwarden/server':
         image_tag => 'latest',
-        ensure => present
+        ensure => present,
 }
 
 
-docker::run { 'vaultwarden':
+docker::run { 'vaultwarden/server':
         image  => 'vaultwarden/server',
         ports  => ['80:80'],
-        detach => true,
-        volumes => ['vaultwarden:/data'],
+        detach => false,
+        volumes => ['/vaultwarden/:/data/'],
         restart_service => true,
         require => Class['docker'],
         ensure => present
 }
-
