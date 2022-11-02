@@ -31,7 +31,7 @@ docker::image { 'vaultwarden/server':
 # Run vaultwarden
 docker::run { 'vaultwarden/server':
         image  => 'vaultwarden/server',
-        ports  => ['80:80'],
+        ports  => ['80:80', '443:443'],
         detach => false,
         volumes => ['/vaultwarden/:/data/', '/ssl/:/ssl/'],
         env => ['ROCKET_TLS={certs="/ssl/server.crt",key="/ssl/server.key"}'],
