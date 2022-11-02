@@ -34,7 +34,7 @@ docker::run { 'vaultwarden/server':
         ports  => ['80:80'],
         detach => false,
         volumes => ['/vaultwarden/:/data/', '/ssl/:/ssl/'],
-        env => ['ROCKET_TLS=\'{certs=\"/ssl/server.crt\",key=\"/ssl/server.key\"}\'']
+        env => ['ROCKET_TLS={certs="/ssl/server.crt",key="/ssl/server.key"}'],
         restart_service => true,
         require => Class['docker'],
         ensure => present
