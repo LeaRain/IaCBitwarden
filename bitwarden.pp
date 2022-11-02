@@ -6,6 +6,14 @@ file { '/vaultwarden':
         mode   => '0700',
 }
 
+# Set up ssl
+file { '/ssl':
+        ensure => 'directory',
+        owner  => 'root',
+        group  => 'root',
+        mode   => '0500',
+}
+
 # Docker setup
 class { 'docker':
         version => latest,
@@ -23,9 +31,10 @@ docker::image { 'vaultwarden/server':
 # Run vaultwarden
 docker::run { 'vaultwarden/server':
         image  => 'vaultwarden/server',
-        ports  => ['80:80'],
+        ports  => ['443:80'],
         detach => false,
-        volumes => ['/vaultwarden/:/data/'],
+        volumes => ['/vaultwarden/:/data/', '/ssl/:/ssl/'],
+        env => ['ROCKET_TLS={certs="/ssl/server.crt",key="/ssl/server.key"}'],
         restart_service => true,
         require => Class['docker'],
         ensure => present
