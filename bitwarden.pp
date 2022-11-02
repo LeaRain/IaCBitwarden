@@ -39,3 +39,23 @@ docker::run { 'vaultwarden/server':
         require => Class['docker'],
         ensure => present
 }
+
+# Create backup directory
+file { '/vaultwarden-backup':
+        ensure => 'directory',
+        owner  => 'root',
+        group  => 'root',
+        mode   => '0700',
+}
+
+# Create backup cronjob (backup database every 6 hours)
+cron { 'vaultwarden-backup':
+        ensure => present,
+        command => 'sh -c "tar -zcvpf /vaultwarden-backup/backup-$(date +\%Y-\%m-\%d_\%H-\%M-\%S).tar.gz /vaultwarden"',
+        user => 'root',
+        hour => '*/6',
+        minute => absent,
+        weekday => absent,
+        month => absent,
+        monthday => absent,
+}
