@@ -19,10 +19,12 @@ class { 'docker':
         version => latest,
 }
 
+# Create a docker volume for vaultwarden since it is running in a docker container
 docker_volume { 'vaultwarden':
         ensure => present,
 }
 
+# Get the vaultwarden image: vaultwarden is delivered by one single ready to use image
 docker::image { 'vaultwarden/server':
         image_tag => 'latest',
         ensure => present,
@@ -31,9 +33,12 @@ docker::image { 'vaultwarden/server':
 # Run vaultwarden
 docker::run { 'vaultwarden/server':
         image  => 'vaultwarden/server',
+	# vaultwarden port mapping requires this https/http mapping
         ports  => ['443:80'],
+	# detach to false, so the container does not crash right after starting
         detach => false,
         volumes => ['/vaultwarden/:/data/', '/ssl/:/ssl/'],
+	# Self signed certificate for web page
         env => ['ROCKET_TLS={certs="/ssl/server.crt",key="/ssl/server.key"}'],
         restart_service => true,
         require => Class['docker'],
