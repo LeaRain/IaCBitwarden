@@ -1,6 +1,14 @@
+# Set up directory permissions
+file { '/vaultwarden':
+        ensure => 'directory',
+        owner  => 'root',
+        group  => 'root',
+        mode   => '0700',
+}
+
+# Docker setup
 class { 'docker':
         version => latest,
-        docker_users => ['ubuntu'],
 }
 
 docker_volume { 'vaultwarden':
@@ -12,7 +20,7 @@ docker::image { 'vaultwarden/server':
         ensure => present,
 }
 
-
+# Run vaultwarden
 docker::run { 'vaultwarden/server':
         image  => 'vaultwarden/server',
         ports  => ['80:80'],
