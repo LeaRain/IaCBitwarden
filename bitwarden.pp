@@ -9,7 +9,6 @@ file { '/vaultwarden':
 # Docker setup
 class { 'docker':
         version => latest,
-        docker_users => ['ubuntu'],
 }
 
 docker_volume { 'vaultwarden':
