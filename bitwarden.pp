@@ -54,7 +54,7 @@ cron { 'vaultwarden-backup':
         command => 'sh -c "tar -zcvpf /vaultwarden-backup/backup-$(date +\%Y-\%m-\%d_\%H-\%M-\%S).tar.gz /vaultwarden"',
         user => 'root',
         hour => '*/6',
-        minute => absent,
+        minute => '0',
         weekday => absent,
         month => absent,
         monthday => absent,
