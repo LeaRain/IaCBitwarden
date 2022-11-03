@@ -1,21 +1,21 @@
 class { 'postgresql::server':
-        # current workaround, considered as not secure
+        # current workaround, considered as not secure for public usage/in external network
         listen_addresses => ['0.0.0.0']
 }
 
 postgresql::server::db { 'vaultwarden':
         user     => 'vaultwarden',
         # also not very secure
-        password => postgresql::postgresql_password('vaultwarden', 'test1234'),
+        password => postgresql::postgresql_password('vaultwarden', lookup('bitwarden::postgres_password')),
         require  => Class['postgresql::server'],
 }
 
 postgresql::server::pg_hba_rule { 'allow database connections from the outside':
-  type        => 'host',
-  database    => 'all',
-  user        => 'all',
-  address     => '0.0.0.0/0',
-  auth_method => 'md5',
+        type        => 'host',
+        database    => 'all',
+        user        => 'all',
+        address     => '0.0.0.0/0',
+        auth_method => 'md5',
 }
 
 # Set up directory permissions
@@ -59,7 +59,7 @@ docker::run { 'vaultwarden/server':
         detach => false,
         volumes => ['/vaultwarden/:/data/', '/ssl/:/ssl/'],
         # Self signed certificate for web page
-        env => ['ROCKET_TLS={certs="/ssl/server.crt",key="/ssl/server.key"}', 'DATABASE_URL=postgresql://vaultwarden:test1234@10.212.136.24:5432/vaultwarden'],
+        env => ['ROCKET_TLS={certs="/ssl/server.crt",key="/ssl/server.key"}', "DATABASE_URL=postgresql://vaultwarden:${lookup('bitwarden::postgres_password')}@${lookup('bitwarden::postgres_host')}:5432/vaultwarden"],
         restart_service => true,
         require => Class['docker'],
         ensure => present
