@@ -119,6 +119,17 @@ resources:
           port_range_max: 443
           remote_ip_prefix: 0.0.0.0/0
 
+
+  security_group_postgres:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      name: postgres_group
+      rules:
+        - protocol: tcp
+          port_range_min: 5432
+          port_range_max: 5432
+          remote_ip_prefix: 0.0.0.0/0
+
   server_floating_ip:
     type: OS::Neutron::FloatingIP
     properties:

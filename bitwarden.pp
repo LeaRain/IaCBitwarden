@@ -1,3 +1,23 @@
+class { 'postgresql::server':
+        # current workaround, considered as not secure
+        listen_addresses => ['0.0.0.0']
+}
+
+postgresql::server::db { 'vaultwarden':
+        user     => 'vaultwarden',
+        # also not very secure
+        password => postgresql::postgresql_password('vaultwarden', 'test1234'),
+        require  => Class['postgresql::server'],
+}
+
+postgresql::server::pg_hba_rule { 'allow database connections from the outside':
+  type        => 'host',
+  database    => 'all',
+  user        => 'all',
+  address     => '0.0.0.0/0',
+  auth_method => 'md5',
+}
+
 # Set up directory permissions
 file { '/vaultwarden':
         ensure => 'directory',
@@ -33,13 +53,13 @@ docker::image { 'vaultwarden/server':
 # Run vaultwarden
 docker::run { 'vaultwarden/server':
         image  => 'vaultwarden/server',
-	# vaultwarden port mapping requires this https/http mapping
+        # vaultwarden port mapping requires this https/http mapping
         ports  => ['443:80'],
-	# detach to false, so the container does not crash right after starting
+        # detach to false, so the container does not crash right after starting
         detach => false,
         volumes => ['/vaultwarden/:/data/', '/ssl/:/ssl/'],
-	# Self signed certificate for web page
-        env => ['ROCKET_TLS={certs="/ssl/server.crt",key="/ssl/server.key"}'],
+        # Self signed certificate for web page
+        env => ['ROCKET_TLS={certs="/ssl/server.crt",key="/ssl/server.key"}', 'DATABASE_URL=postgresql://vaultwarden:test1234@10.212.136.24:5432/vaultwarden'],
         restart_service => true,
         require => Class['docker'],
         ensure => present
@@ -64,3 +84,4 @@ cron { 'vaultwarden-backup':
         month => absent,
         monthday => absent,
 }
+
