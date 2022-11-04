@@ -1,4 +1,13 @@
 class { 'postgresql::server':
+        backup_enable   => true,
+        backup_provider => 'pg_dump',
+        backup_options  => {
+                db_user     => 'backupuser',
+                db_password => lookup('bitwarden::postgres_backup_password'),
+                manage_user => true,
+                rotate      => 15,
+                dir => '/postgres-backup',
+        }
 }
 
 postgresql::server::db { 'vaultwarden':
