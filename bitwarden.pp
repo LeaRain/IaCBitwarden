@@ -1,11 +1,8 @@
 class { 'postgresql::server':
-        # current workaround, considered as not secure for public usage/in external network
-        listen_addresses => ['0.0.0.0']
 }
 
 postgresql::server::db { 'vaultwarden':
         user     => 'vaultwarden',
-        # also not very secure
         password => postgresql::postgresql_password('vaultwarden', lookup('bitwarden::postgres_password')),
         require  => Class['postgresql::server'],
 }
@@ -60,6 +57,7 @@ docker::run { 'vaultwarden/server':
         volumes => ['/vaultwarden/:/data/', '/ssl/:/ssl/'],
         # Self signed certificate for web page
         env => ['ROCKET_TLS={certs="/ssl/server.crt",key="/ssl/server.key"}', "DATABASE_URL=postgresql://vaultwarden:${lookup('bitwarden::postgres_password')}@${lookup('bitwarden::postgres_host')}:5432/vaultwarden"],
+        extra_parameters => ['--add-host=host.docker.internal:host-gateway'],
         restart_service => true,
         require => Class['docker'],
         ensure => present
