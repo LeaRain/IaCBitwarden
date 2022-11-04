@@ -1,3 +1,29 @@
+class { 'postgresql::server':
+        backup_enable   => true,
+        backup_provider => 'pg_dump',
+        backup_options  => {
+                db_user     => 'backupuser',
+                db_password => lookup('bitwarden::postgres_backup_password'),
+                manage_user => true,
+                rotate      => 15,
+                dir => '/postgres-backup',
+        }
+}
+
+postgresql::server::db { 'vaultwarden':
+        user     => 'vaultwarden',
+        password => postgresql::postgresql_password('vaultwarden', lookup('bitwarden::postgres_password')),
+        require  => Class['postgresql::server'],
+}
+
+postgresql::server::pg_hba_rule { 'allow database connections from the outside':
+        type        => 'host',
+        database    => 'all',
+        user        => 'all',
+        address     => '0.0.0.0/0',
+        auth_method => 'md5',
+}
+
 # Set up directory permissions
 file { '/vaultwarden':
         ensure => 'directory',
@@ -33,13 +59,14 @@ docker::image { 'vaultwarden/server':
 # Run vaultwarden
 docker::run { 'vaultwarden/server':
         image  => 'vaultwarden/server',
-	# vaultwarden port mapping requires this https/http mapping
+        # vaultwarden port mapping requires this https/http mapping
         ports  => ['443:80'],
-	# detach to false, so the container does not crash right after starting
+        # detach to false, so the container does not crash right after starting
         detach => false,
         volumes => ['/vaultwarden/:/data/', '/ssl/:/ssl/'],
-	# Self signed certificate for web page
-        env => ['ROCKET_TLS={certs="/ssl/server.crt",key="/ssl/server.key"}'],
+        # Self signed certificate for web page
+        env => ['ROCKET_TLS={certs="/ssl/server.crt",key="/ssl/server.key"}', "DATABASE_URL=postgresql://vaultwarden:${lookup('bitwarden::postgres_password')}@${lookup('bitwarden::postgres_host')}:5432/vaultwarden"],
+        extra_parameters => ['--add-host=host.docker.internal:host-gateway'],
         restart_service => true,
         require => Class['docker'],
         ensure => present
@@ -64,3 +91,4 @@ cron { 'vaultwarden-backup':
         month => absent,
         monthday => absent,
 }
+
