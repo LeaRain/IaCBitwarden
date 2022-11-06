@@ -4,3 +4,6 @@ This is a project for the course Infrastructure as Code by Joakim Klemets at NTN
 
 The project itselt contains the setup process of a password manager, in this case Bitwarden (as frontend) and Vaultwarden (as backend).   
 
+Please notice that we have used the following puppet modules:
+* puppetlabs-docker
+* puppetlabs-postgresql
